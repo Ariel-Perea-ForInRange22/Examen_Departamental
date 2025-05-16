@@ -1,0 +1,62 @@
+﻿[
+    {
+        "id": "MAT001",
+        "nombre": "Calculo Diferencial"
+    },
+    {
+        "id": "MAT002",
+        "nombre": "Calculo Integral"
+    },
+    {
+        "id": "PRG001",
+        "nombre": "Programacion Basica"
+    },
+    {
+        "id": "PRG002",
+        "nombre": "Programacion Orientada a Objetos"
+    },
+    {
+        "id": "FIS001",
+        "nombre": "Fisica I"
+    },
+    {
+        "id": "FIS002",
+        "nombre": "Fisica II"
+    },
+    {
+        "id": "BD001",
+        "nombre": "Bases de Datos"
+    },
+    {
+        "id": "RED001",
+        "nombre": "Redes de Computadoras"
+    },
+    {
+        "id": "MAT003",
+        "nombre": "Cálculo Vectorial"
+    },
+    {
+        "id": "MAT004",
+        "nombre": "Cálculo Integral"
+    },
+    {
+        "id": "MAT005",
+        "nombre": "Álgebra Lineal"
+    },
+    {
+        "id": "MAT006",
+        "nombre": "Ecuaciones Diferenciales"
+    },
+    {
+        "id": "MAT007",
+        "nombre": "Matemáticas Discretas"
+    },
+    {
+        "id": "MAT008",
+        "nombre": "Estadística"
+    },
+    {
+        "id": "MAT009",
+        "nombre": "Matemáticas Financieras"
+    }
+]

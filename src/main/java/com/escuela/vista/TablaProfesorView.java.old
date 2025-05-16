@@ -1,0 +1,165 @@
+package com.escuela.vista;
+
+import com.escuela.modelo.Profesor;
+import com.escuela.modelo.Materia;
+import com.escuela.modelo.ProfesorDAO;
+import com.escuela.modelo.MateriaDAO;
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.io.IOException;
+
+public class TablaProfesorView extends JDialog {
+    private JTable tabla;
+    private DefaultTableModel modelo;    private List<Profesor> profesores;
+    private ProfesorDAO profesorDAO;
+
+    public TablaProfesorView(JFrame parent, List<Profesor> profesores) {
+        super(parent, "Lista de Profesores", true);
+        this.profesores = profesores;
+        this.profesorDAO = new ProfesorDAO();
+        initComponents();
+        setSize(800, 400);
+        setLocationRelativeTo(parent);
+    }
+
+    private void editarProfesorSeleccionado() {
+        int filaSeleccionada = tabla.getSelectedRow();
+        if (filaSeleccionada >= 0) {
+            Profesor profesor = profesores.get(filaSeleccionada);
+            EditarProfesorDialog dialogo = new EditarProfesorDialog(this, profesor);
+            dialogo.setVisible(true);
+            // Si el profesor fue editado, actualizar la tabla
+            if (dialogo.fueEditado()) {
+                modelo.setValueAt(profesor.getNombre(), filaSeleccionada, 0);
+                modelo.setValueAt(profesor.getApellido(), filaSeleccionada, 1);
+                modelo.setValueAt(profesor.getNumEmpleado(), filaSeleccionada, 2);
+                String materiasStr = profesor.getMaterias().stream()
+                    .map(Materia::getNombre)
+                    .collect(Collectors.joining(", "));
+                modelo.setValueAt(materiasStr, filaSeleccionada, 3);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this,
+                "Por favor, seleccione un profesor para editar",
+                "Selección requerida",
+                JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+
+    private void eliminarProfesorSeleccionado() {
+        int filaSeleccionada = tabla.getSelectedRow();
+        if (filaSeleccionada >= 0) {
+            int confirmacion = JOptionPane.showConfirmDialog(this,
+                "¿Está seguro que desea eliminar este profesor?",
+                "Confirmar eliminación",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE);
+            
+            if (confirmacion == JOptionPane.YES_OPTION) {
+                try {
+                    // Eliminar de la lista y actualizar el archivo
+                    profesores.remove(filaSeleccionada);
+                    profesorDAO.actualizarProfesores(profesores);
+                    
+                    // Eliminar de la tabla
+                    modelo.removeRow(filaSeleccionada);
+                    
+                    JOptionPane.showMessageDialog(this,
+                        "Profesor eliminado exitosamente",
+                        "Éxito",
+                        JOptionPane.INFORMATION_MESSAGE);
+                } catch (IOException e) {
+                    JOptionPane.showMessageDialog(this,
+                        "Error al eliminar el profesor: " + e.getMessage(),
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        } else {
+            JOptionPane.showMessageDialog(this,
+                "Por favor, seleccione un profesor para eliminar",
+                "Selección requerida",
+                JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+
+    private void initComponents() {
+        // Crear el modelo de la tabla
+        String[] columnas = {"Nombre", "Apellido", "Número de Empleado", "Materias"};
+        modelo = new DefaultTableModel(columnas, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false; // Hacer la tabla no editable
+            }
+        };
+
+        // Llenar la tabla con los datos
+        for (Profesor profesor : profesores) {
+            String materiasStr = profesor.getMaterias().stream()
+                .map(Materia::getNombre)
+                .collect(Collectors.joining(", "));
+            
+            Object[] fila = {
+                profesor.getNombre(),
+                profesor.getApellido(),
+                profesor.getNumEmpleado(),
+                materiasStr
+            };
+            modelo.addRow(fila);
+        }
+
+        // Crear la tabla
+        tabla = new JTable(modelo);
+        tabla.setFillsViewportHeight(true);
+        tabla.setShowGrid(true);
+        tabla.setGridColor(Color.BLACK);
+        tabla.setRowHeight(25);
+        tabla.setForeground(Color.BLACK);
+
+        // Configurar el encabezado
+        tabla.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
+        tabla.getTableHeader().setBackground(new Color(70, 130, 180));
+        tabla.getTableHeader().setForeground(Color.WHITE);
+
+        // Crear el panel con scroll
+        JScrollPane scrollPane = new JScrollPane(tabla);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        // Configurar el layout
+        setLayout(new BorderLayout());
+        add(scrollPane, BorderLayout.CENTER);
+
+        // Panel para los botones
+        JPanel panelBoton = new JPanel();
+        panelBoton.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+
+        // Botón de editar
+        JButton btnEditar = new JButton("Editar");
+        btnEditar.setPreferredSize(new Dimension(100, 30));
+        btnEditar.addActionListener(e -> editarProfesorSeleccionado());
+        
+        // Botón de eliminar
+        JButton btnEliminar = new JButton("Eliminar");
+        btnEliminar.setPreferredSize(new Dimension(100, 30));
+        btnEliminar.setBackground(new Color(220, 53, 69));  // Color rojo
+        btnEliminar.setForeground(Color.WHITE);
+        btnEliminar.addActionListener(e -> eliminarProfesorSeleccionado());
+        
+        // Botón de cerrar
+        JButton btnCerrar = new JButton("Cerrar");
+        btnCerrar.setPreferredSize(new Dimension(100, 30));
+        btnCerrar.addActionListener(e -> dispose());
+        
+        // Agregar espaciado entre botones
+        panelBoton.add(btnEditar);
+        panelBoton.add(Box.createRigidArea(new Dimension(20, 0))); // Espacio entre botones
+        panelBoton.add(btnEliminar);
+        panelBoton.add(Box.createRigidArea(new Dimension(20, 0))); // Espacio entre botones
+        panelBoton.add(btnCerrar);
+        
+        add(panelBoton, BorderLayout.SOUTH);
+    }
+}
